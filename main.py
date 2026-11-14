@@ -390,8 +390,12 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     png = encode_png(render(), W, H)
     path = os.path.join(out_dir, "entry.png")
-    with open(path, "wb") as f:
+    # Write atomically via a temp file in the same directory, so an
+    # interrupted run can never leave a partial entry.png behind.
+    tmp_path = path + ".tmp"
+    with open(tmp_path, "wb") as f:
         f.write(png)
+    os.replace(tmp_path, path)
     print(f"wrote {path} ({len(png)} bytes)")
 
 
